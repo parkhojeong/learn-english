@@ -1,55 +1,71 @@
 # English Practice App - Current State
 
 ## Overview
-A SwiftUI iOS app for practicing English sentences with Korean translations and text-to-speech.
+A SwiftUI iOS app for practicing English grammar through Korean-to-English sentence translation, with text-to-speech and part-of-speech highlighting.
 
 ## Architecture
 
 ### Models
 - **`SentenceItem`** — `Identifiable` struct with `korean` and `english` String properties.
+- **`GrammarStage`** — `Identifiable` struct defining a grammar stage with `title`, `subtitle`, `icon`, and `sentencePool`.
 - **`SpeechManager`** — `@Observable` class wrapping `AVSpeechSynthesizer` for English TTS (en-US, rate 0.45).
 
 ### Views
-- **`ContentView`** — Main screen with a `NavigationStack` and scrollable list of sentence cards.
+- **`ContentView`** — `TabView` with bottom tab navigation (Stages + Random).
+- **`StageListView`** — Numbered list of 20 grammar stages, each navigating to a practice view.
+- **`SentencePracticeView`** — Scrollable card list for a specific stage. Korean shown by default, tap to reveal English + TTS.
+- **`RandomPracticeView`** — Shows one random sentence from all stages. Tap to reveal, shuffle button for next.
+
+### Helper
+- **`taggedEnglish(_:)`** — Uses `NLTagger` (NaturalLanguage framework) to parse English sentences and return an `AttributedString` with subject and predicate in **bold primary** and other words in secondary color. Handles both statement (S-V) and question (V-S) word order.
 
 ### State
-- `sentences: [SentenceItem]` — List of added sentence pairs.
-- `expandedIDs: Set<UUID>` — Tracks which cards are expanded (showing English).
+- `sentences: [SentenceItem]` — List of sentence pairs for a stage.
+- `expandedIDs: Set<UUID>` — Tracks which cards are expanded.
 - `speechManager: SpeechManager` — Manages text-to-speech.
+- `currentSentence` / `showEnglish` — Random practice state.
 
 ## UI Behavior
-1. Tap **+** button to add a random Korean-English sentence pair from the pool.
-2. Each card shows **Korean text** by default.
-3. Tap a card to **expand** — reveals the English translation + a speaker button.
-4. Tap the **speaker button** to hear the English sentence via TTS.
-5. Tap an expanded card again to **collapse** it.
 
-## Sentence Pool (15 sentences)
+### Stages Tab
+1. Numbered list of 20 grammar stages.
+2. Tap a stage to open its sentence practice view.
+3. Each card shows **Korean text** by default.
+4. Tap a card to **reveal** the English translation with POS highlighting + auto TTS.
+5. Tap the **speaker button** to replay TTS.
+6. Tap an expanded card again to **collapse** it.
 
-### "I am" statements
-| Korean | English |
-|--------|---------|
-| 나는 학생입니다. | I am a student. |
-| 나는 오늘 행복합니다. | I am happy today. |
-| 나는 한국에서 왔습니다. | I am from Korea. |
-| 나는 피곤합니다. | I am tired. |
-| 나는 갈 준비가 되었습니다. | I am ready to go. |
-| 나는 영어를 배우고 있습니다. | I am learning English. |
-| 나는 배가 고픕니다. | I am hungry. |
-| 나는 잘 들어주는 사람입니다. | I am a good listener. |
+### Random Tab
+1. Shows a random Korean sentence from all stages.
+2. Tap the card to **reveal** English with POS highlighting + auto TTS.
+3. Tap **Next** to shuffle to a new random sentence.
 
-### "Am I" questions
-| Korean | English |
-|--------|---------|
-| 내가 늦었나요? | Am I late? |
-| 내가 이것을 제대로 하고 있나요? | Am I doing this right? |
-| 내가 당신의 친구인가요? | Am I your friend? |
-| 내가 너무 시끄러운가요? | Am I too loud? |
-| 내가 맞는 길로 가고 있나요? | Am I on the right way? |
-| 내가 일찍 왔나요? | Am I early? |
-| 내가 너무 빨리 말하고 있나요? | Am I speaking too fast? |
+## Grammar Stages (20 stages, ~198 sentences)
+
+| # | Pattern | Sentences |
+|---|---------|-----------|
+| 1 | I am — Statements | 8 |
+| 2 | Am I — Questions | 10 |
+| 3 | I want / I need | 10 |
+| 4 | I can / I can't | 10 |
+| 5 | I have / I don't have | 10 |
+| 6 | I like / I don't like | 10 |
+| 7 | I will / I won't | 10 |
+| 8 | was / were — Past | 10 |
+| 9 | should / should not | 10 |
+| 10 | could / could not | 10 |
+| 11 | would / would not | 10 |
+| 12 | must / must not | 10 |
+| 13 | do / does — Present | 10 |
+| 14 | don't / doesn't | 10 |
+| 15 | did — Past Simple | 10 |
+| 16 | go / come / get | 10 |
+| 17 | make / take / give | 10 |
+| 18 | know / think / feel | 10 |
+| 19 | see / look / watch | 10 |
+| 20 | say / tell / ask | 10 |
 
 ## Files
-- `ios/ios/ContentView.swift` — Main view + models + speech manager
+- `ios/ios/ContentView.swift` — All views, models, POS tagging, speech manager
 - `ios/ios/iosApp.swift` — App entry point
 - `ios/ios/Item.swift` — (unused SwiftData boilerplate)
