@@ -253,6 +253,142 @@ let grammarStages: [GrammarStage] = [
             ("시험 중에 전화를 사용하면 안 됩니다.", "You must not use your phone during the exam."),
         ]
     ),
+    GrammarStage(
+        title: "Stage 13",
+        subtitle: "do / does — Present",
+        icon: "checkmark.circle.fill",
+        sentencePool: [
+            ("나는 매일 운동합니다.", "I do exercise every day."),
+            ("그녀는 아침에 요가를 합니다.", "She does yoga in the morning."),
+            ("나는 이해합니다.", "I do understand."),
+            ("그는 여기서 일합니다.", "He does work here."),
+            ("우리는 최선을 다합니다.", "We do our best."),
+            ("그것은 중요합니다.", "It does matter."),
+            ("나는 당신을 믿습니다.", "I do believe you."),
+            ("그녀는 요리를 잘 합니다.", "She does cook well."),
+            ("나는 동의합니다.", "I do agree."),
+            ("그는 정말 열심히 일합니다.", "He does work really hard."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 14",
+        subtitle: "don't / doesn't",
+        icon: "xmark.circle.fill",
+        sentencePool: [
+            ("나는 커피를 마시지 않습니다.", "I don't drink coffee."),
+            ("그녀는 고기를 먹지 않습니다.", "She doesn't eat meat."),
+            ("나는 그것을 이해하지 못합니다.", "I don't understand that."),
+            ("그는 여기에 살지 않습니다.", "He doesn't live here."),
+            ("우리는 그것에 동의하지 않습니다.", "We don't agree with that."),
+            ("날씨가 좋아 보이지 않습니다.", "It doesn't look good."),
+            ("나는 그 사람을 모릅니다.", "I don't know that person."),
+            ("그녀는 영어를 말하지 않습니다.", "She doesn't speak English."),
+            ("나는 그것이 필요하지 않습니다.", "I don't need that."),
+            ("그는 신경 쓰지 않습니다.", "He doesn't care."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 15",
+        subtitle: "did — Past Simple",
+        icon: "clock.fill",
+        sentencePool: [
+            ("나는 어제 그것을 했습니다.", "I did it yesterday."),
+            ("그녀는 숙제를 끝냈습니다.", "She did her homework."),
+            ("우리는 좋은 일을 했습니다.", "We did a good job."),
+            ("나는 어제 그를 보지 못했습니다.", "I didn't see him yesterday."),
+            ("그들은 제시간에 도착하지 못했습니다.", "They didn't arrive on time."),
+            ("너는 그에게 말했니?", "Did you tell him?"),
+            ("그녀는 파티에 오지 않았습니다.", "She didn't come to the party."),
+            ("너는 아침을 먹었니?", "Did you eat breakfast?"),
+            ("나는 그것을 기대하지 못했습니다.", "I didn't expect that."),
+            ("그는 무엇을 말했나요?", "What did he say?"),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 16",
+        subtitle: "go / come / get",
+        icon: "figure.walk",
+        sentencePool: [
+            ("나는 학교에 갑니다.", "I go to school."),
+            ("여기로 오세요.", "Come here, please."),
+            ("나는 버스를 탑니다.", "I get the bus."),
+            ("우리 집에 가자.", "Let's go home."),
+            ("그가 곧 올 겁니다.", "He will come soon."),
+            ("나는 답을 알아냈습니다.", "I got the answer."),
+            ("같이 가도 될까요?", "Can I go with you?"),
+            ("언제 한국에 오셨나요?", "When did you come to Korea?"),
+            ("나는 점점 나아지고 있습니다.", "I'm getting better."),
+            ("어디 가세요?", "Where are you going?"),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 17",
+        subtitle: "make / take / give",
+        icon: "hand.raised.fill",
+        sentencePool: [
+            ("나는 결정을 내렸습니다.", "I made a decision."),
+            ("사진 한 장 찍어 주세요.", "Please take a photo."),
+            ("그것을 나에게 주세요.", "Give it to me."),
+            ("그녀는 나를 웃게 만듭니다.", "She makes me laugh."),
+            ("시간이 좀 걸릴 겁니다.", "It will take some time."),
+            ("나에게 기회를 주세요.", "Give me a chance."),
+            ("실수하지 마세요.", "Don't make a mistake."),
+            ("택시를 타세요.", "Take a taxi."),
+            ("나는 당신에게 조언을 해 줄게요.", "I'll give you some advice."),
+            ("이것은 차이를 만듭니다.", "This makes a difference."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 18",
+        subtitle: "know / think / feel",
+        icon: "brain.fill",
+        sentencePool: [
+            ("나는 알고 있습니다.", "I know."),
+            ("나는 그것이 좋은 생각이라고 생각합니다.", "I think it's a good idea."),
+            ("나는 기분이 좋습니다.", "I feel good."),
+            ("나는 그 이유를 모르겠습니다.", "I don't know the reason."),
+            ("당신은 어떻게 생각하세요?", "What do you think?"),
+            ("나는 좀 불안합니다.", "I feel a little nervous."),
+            ("그것은 누구나 알고 있습니다.", "Everyone knows that."),
+            ("나는 우리가 할 수 있다고 생각합니다.", "I think we can do it."),
+            ("나는 집이 그립습니다.", "I feel homesick."),
+            ("나는 어디서 시작해야 할지 모르겠습니다.", "I don't know where to start."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 19",
+        subtitle: "see / look / watch",
+        icon: "eye.fill",
+        sentencePool: [
+            ("나는 그를 어제 봤습니다.", "I saw him yesterday."),
+            ("이것 좀 봐 주세요.", "Please look at this."),
+            ("우리 영화를 보자.", "Let's watch a movie."),
+            ("나는 차이를 모르겠습니다.", "I don't see the difference."),
+            ("너 피곤해 보인다.", "You look tired."),
+            ("나는 매일 뉴스를 봅니다.", "I watch the news every day."),
+            ("알겠습니다.", "I see."),
+            ("밖을 봐 보세요.", "Look outside."),
+            ("아이들을 좀 봐 주세요.", "Please watch the children."),
+            ("나는 그녀를 오랫동안 보지 못했습니다.", "I haven't seen her for a long time."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 20",
+        subtitle: "say / tell / ask",
+        icon: "text.bubble.fill",
+        sentencePool: [
+            ("그가 뭐라고 말했나요?", "What did he say?"),
+            ("나에게 사실을 말해 주세요.", "Tell me the truth."),
+            ("질문 하나 해도 될까요?", "Can I ask a question?"),
+            ("다시 한번 말해 주세요.", "Please say that again."),
+            ("그녀는 나에게 비밀을 알려줬습니다.", "She told me a secret."),
+            ("길을 물어봐야 합니다.", "I need to ask for directions."),
+            ("안녕이라고 말하세요.", "Say goodbye."),
+            ("나에게 어떻게 하는지 알려주세요.", "Tell me how to do it."),
+            ("가격을 물어보세요.", "Ask about the price."),
+            ("미안하다고 말하고 싶습니다.", "I want to say I'm sorry."),
+        ]
+    ),
 ]
 
 // MARK: - Stage Selection View
