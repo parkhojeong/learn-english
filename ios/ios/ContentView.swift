@@ -39,21 +39,23 @@ struct ContentView: View {
     @State private var speechManager = SpeechManager()
 
     private let sentencePool: [String] = [
-        "The quick brown fox jumps over the lazy dog.",
-        "Learning English is a wonderful journey that opens doors to new cultures.",
-        "Practice makes perfect when it comes to mastering a new language.",
-        "Reading books every day can significantly improve your vocabulary.",
-        "She decided to travel abroad to immerse herself in the English language.",
-        "Communication is the key to building strong relationships with others.",
-        "The weather forecast predicted heavy rain throughout the entire weekend.",
-        "He completed his assignment before the deadline and submitted it early.",
-        "Technology has transformed the way people learn and communicate globally.",
-        "A balanced diet and regular exercise are essential for a healthy lifestyle.",
-        "The museum exhibit showcased artwork from various historical periods.",
-        "Critical thinking skills are developed through practice and reflection.",
-        "The concert was absolutely amazing and exceeded everyone's expectations.",
-        "Understanding grammar rules helps you construct sentences more accurately.",
-        "Patience and consistency are the most important qualities for language learners.",
+        // I am — statements
+        "I am a student.",
+        "I am happy today.",
+        "I am from Korea.",
+        "I am tired.",
+        "I am ready to go.",
+        "I am learning English.",
+        "I am hungry.",
+        "I am a good listener.",
+        // Am I — questions
+        "Am I late?",
+        "Am I doing this right?",
+        "Am I your friend?",
+        "Am I too loud?",
+        "Am I on the right way?",
+        "Am I early?",
+        "Am I speaking too fast?",
     ]
 
     var body: some View {
