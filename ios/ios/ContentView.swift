@@ -168,6 +168,91 @@ let grammarStages: [GrammarStage] = [
             ("나는 아무에게도 말하지 않겠습니다.", "I won't tell anyone."),
         ]
     ),
+    GrammarStage(
+        title: "Stage 8",
+        subtitle: "was / were — Past",
+        icon: "clock.arrow.circlepath",
+        sentencePool: [
+            ("나는 어제 바빴습니다.", "I was busy yesterday."),
+            ("그들은 파티에 있었습니다.", "They were at the party."),
+            ("그녀는 정말 친절했습니다.", "She was really kind."),
+            ("우리는 같은 학교에 있었습니다.", "We were in the same school."),
+            ("날씨가 추웠습니다.", "It was cold."),
+            ("그 아이들은 행복했습니다.", "The children were happy."),
+            ("그는 좋은 선생님이었습니다.", "He was a good teacher."),
+            ("너희들은 정말 용감했어.", "You were really brave."),
+            ("그 영화는 재미있었습니다.", "It was an interesting movie."),
+            ("그들은 오랜 친구였습니다.", "They were old friends."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 9",
+        subtitle: "should / should not",
+        icon: "exclamationmark.triangle.fill",
+        sentencePool: [
+            ("너는 더 많이 자야 합니다.", "You should sleep more."),
+            ("우리는 여기서 떠들면 안 됩니다.", "We should not talk here."),
+            ("그는 의사에게 가야 합니다.", "He should see a doctor."),
+            ("당신은 그녀에게 거짓말하면 안 됩니다.", "You should not lie to her."),
+            ("나는 더 열심히 공부해야 합니다.", "I should study harder."),
+            ("그들은 늦으면 안 됩니다.", "They should not be late."),
+            ("우리는 서로 도와야 합니다.", "We should help each other."),
+            ("너는 너무 많이 걱정하면 안 돼.", "You should not worry too much."),
+            ("나는 물을 더 많이 마셔야 합니다.", "I should drink more water."),
+            ("당신은 포기하면 안 됩니다.", "You should not give up."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 10",
+        subtitle: "could / could not",
+        icon: "lightbulb.fill",
+        sentencePool: [
+            ("나는 그 답을 찾을 수 없었습니다.", "I could not find the answer."),
+            ("우리는 함께 갈 수 있었습니다.", "We could go together."),
+            ("그녀는 어렸을 때 피아노를 칠 수 있었습니다.", "She could play the piano when she was young."),
+            ("나는 아무것도 볼 수 없었습니다.", "I could not see anything."),
+            ("그는 세 가지 언어를 말할 수 있었습니다.", "He could speak three languages."),
+            ("우리는 그를 믿을 수 없었습니다.", "We could not believe him."),
+            ("당신은 나에게 물어볼 수 있었습니다.", "You could have asked me."),
+            ("나는 잠을 잘 수 없었습니다.", "I could not sleep."),
+            ("그들은 더 일찍 도착할 수 있었습니다.", "They could have arrived earlier."),
+            ("나는 그 차이를 느낄 수 없었습니다.", "I could not feel the difference."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 11",
+        subtitle: "would / would not",
+        icon: "bubble.left.fill",
+        sentencePool: [
+            ("나는 그렇게 하지 않겠습니다.", "I would not do that."),
+            ("그녀는 항상 나를 도와주곤 했습니다.", "She would always help me."),
+            ("당신이라면 어떻게 하시겠습니까?", "What would you do?"),
+            ("나는 그것을 추천하지 않겠습니다.", "I would not recommend it."),
+            ("그는 매일 공원에서 산책하곤 했습니다.", "He would walk in the park every day."),
+            ("나라면 그 제안을 받아들이겠습니다.", "I would accept that offer."),
+            ("그들은 거기에 가지 않겠다고 했습니다.", "They would not go there."),
+            ("당신이라면 기다리시겠습니까?", "Would you wait?"),
+            ("나는 차라리 집에 있겠습니다.", "I would rather stay home."),
+            ("그녀는 절대 그런 말을 하지 않을 겁니다.", "She would never say that."),
+        ]
+    ),
+    GrammarStage(
+        title: "Stage 12",
+        subtitle: "must / must not",
+        icon: "lock.fill",
+        sentencePool: [
+            ("당신은 안전벨트를 매야 합니다.", "You must wear a seatbelt."),
+            ("여기서 사진을 찍으면 안 됩니다.", "You must not take photos here."),
+            ("우리는 규칙을 따라야 합니다.", "We must follow the rules."),
+            ("이것을 아무에게도 말하면 안 됩니다.", "You must not tell anyone."),
+            ("나는 이 일을 끝내야 합니다.", "I must finish this work."),
+            ("여기서 뛰면 안 됩니다.", "You must not run here."),
+            ("그는 매우 피곤한 게 틀림없습니다.", "He must be very tired."),
+            ("도서관에서 큰 소리로 말하면 안 됩니다.", "You must not speak loudly in the library."),
+            ("나는 더 노력해야 합니다.", "I must try harder."),
+            ("시험 중에 전화를 사용하면 안 됩니다.", "You must not use your phone during the exam."),
+        ]
+    ),
 ]
 
 // MARK: - Stage Selection View
