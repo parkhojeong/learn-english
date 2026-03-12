@@ -391,9 +391,26 @@ let grammarStages: [GrammarStage] = [
     ),
 ]
 
-// MARK: - Stage Selection View
+// MARK: - Tab View
 
 struct ContentView: View {
+    var body: some View {
+        TabView {
+            StageListView()
+                .tabItem {
+                    Label("Stages", systemImage: "list.number")
+                }
+            RandomPracticeView()
+                .tabItem {
+                    Label("Random", systemImage: "shuffle")
+                }
+        }
+    }
+}
+
+// MARK: - Stage Selection View
+
+struct StageListView: View {
     var body: some View {
         NavigationStack {
             List {
@@ -411,12 +428,104 @@ struct ContentView: View {
                 }
             }
             .listStyle(.plain)
-            .navigationTitle("English Practice")
+            .navigationTitle("Stages")
             .navigationDestination(for: UUID.self) { stageID in
                 if let stage = grammarStages.first(where: { $0.id == stageID }) {
                     SentencePracticeView(stage: stage)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Random Practice View
+
+struct RandomPracticeView: View {
+    @State private var currentSentence: (korean: String, english: String)?
+    @State private var showEnglish = false
+    @State private var speechManager = SpeechManager()
+
+    private var allSentences: [(korean: String, english: String)] {
+        grammarStages.flatMap { $0.sentencePool }
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 32) {
+                Spacer()
+
+                if let sentence = currentSentence {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(sentence.korean)
+                            .font(.title3.weight(.medium))
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        if showEnglish {
+                            Divider()
+                                .padding(.horizontal)
+
+                            HStack {
+                                Text(sentence.english)
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+
+                                Spacer()
+
+                                Button {
+                                    speechManager.speak(sentence.english)
+                                } label: {
+                                    Image(systemName: "speaker.wave.2.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .onTapGesture {
+                        withAnimation {
+                            showEnglish = true
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    if !showEnglish {
+                        Text("Tap to reveal English")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+
+                Spacer()
+
+                Button {
+                    nextSentence()
+                } label: {
+                    Label("Next", systemImage: "shuffle")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.horizontal)
+                .padding(.bottom, 16)
+            }
+            .navigationTitle("Random Practice")
+            .onAppear {
+                if currentSentence == nil {
+                    nextSentence()
+                }
+            }
+        }
+    }
+
+    private func nextSentence() {
+        withAnimation {
+            showEnglish = false
+            currentSentence = allSentences.randomElement()
         }
     }
 }
