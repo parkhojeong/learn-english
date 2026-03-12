@@ -396,41 +396,21 @@ let grammarStages: [GrammarStage] = [
 struct ContentView: View {
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(grammarStages) { stage in
-                        NavigationLink(value: stage.id) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(stage.title)
-                                        .font(.subheadline.weight(.medium))
-                                        .foregroundStyle(.blue)
-                                    Spacer()
-                                    Text("\(stage.sentencePool.count) sentences")
-                                        .font(.caption)
-                                        .foregroundStyle(.tertiary)
-                                }
-
-                                Text(stage.subtitle)
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(.primary)
-
-                                if let example = stage.sentencePool.first {
-                                    Text("e.g. \(example.english)")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+            List {
+                ForEach(Array(grammarStages.enumerated()), id: \.element.id) { index, stage in
+                    NavigationLink(value: stage.id) {
+                        HStack(spacing: 8) {
+                            Text("\(index + 1).")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 28, alignment: .trailing)
+                            Text(stage.subtitle)
+                                .font(.subheadline.weight(.medium))
                         }
-                        .buttonStyle(.plain)
                     }
                 }
-                .padding()
             }
+            .listStyle(.plain)
             .navigationTitle("English Practice")
             .navigationDestination(for: UUID.self) { stageID in
                 if let stage = grammarStages.first(where: { $0.id == stageID }) {
