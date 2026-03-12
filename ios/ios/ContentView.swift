@@ -63,6 +63,12 @@ struct ContentView: View {
         ("내가 너무 빨리 말하고 있나요?", "Am I speaking too fast?"),
     ]
 
+    init() {
+        _sentences = State(initialValue: sentencePool.map { pair in
+            SentenceItem(korean: pair.korean, english: pair.english)
+        })
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
