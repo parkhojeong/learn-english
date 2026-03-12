@@ -625,6 +625,9 @@ struct RandomPracticeView: View {
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .onTapGesture {
+                        if !showEnglish {
+                            speechManager.speak(sentence.english)
+                        }
                         withAnimation {
                             showEnglish = true
                         }
@@ -713,6 +716,9 @@ struct SentencePracticeView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
                     .onTapGesture {
+                        if !isExpanded {
+                            speechManager.speak(item.english)
+                        }
                         withAnimation {
                             if isExpanded {
                                 expandedIDs.remove(item.id)
