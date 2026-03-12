@@ -29,7 +29,10 @@ class SpeechManager {
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        utterance.rate = 0.45
+        utterance.pitchMultiplier = 1.05
+        utterance.preUtteranceDelay = 0.1
+        utterance.postUtteranceDelay = 0.1
         synthesizer.speak(utterance)
     }
 }
