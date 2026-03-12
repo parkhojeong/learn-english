@@ -10,7 +10,8 @@ import AVFoundation
 
 struct SentenceItem: Identifiable {
     let id = UUID()
-    let text: String
+    let korean: String
+    let english: String
 }
 
 @Observable
@@ -40,25 +41,26 @@ class SpeechManager {
 struct ContentView: View {
     @State private var sentences: [SentenceItem] = []
     @State private var speechManager = SpeechManager()
+    @State private var expandedIDs: Set<UUID> = []
 
-    private let sentencePool: [String] = [
+    private let sentencePool: [(korean: String, english: String)] = [
         // I am — statements
-        "I am a student.",
-        "I am happy today.",
-        "I am from Korea.",
-        "I am tired.",
-        "I am ready to go.",
-        "I am learning English.",
-        "I am hungry.",
-        "I am a good listener.",
+        ("나는 학생입니다.", "I am a student."),
+        ("나는 오늘 행복합니다.", "I am happy today."),
+        ("나는 한국에서 왔습니다.", "I am from Korea."),
+        ("나는 피곤합니다.", "I am tired."),
+        ("나는 갈 준비가 되었습니다.", "I am ready to go."),
+        ("나는 영어를 배우고 있습니다.", "I am learning English."),
+        ("나는 배가 고픕니다.", "I am hungry."),
+        ("나는 잘 들어주는 사람입니다.", "I am a good listener."),
         // Am I — questions
-        "Am I late?",
-        "Am I doing this right?",
-        "Am I your friend?",
-        "Am I too loud?",
-        "Am I on the right way?",
-        "Am I early?",
-        "Am I speaking too fast?",
+        ("내가 늦었나요?", "Am I late?"),
+        ("내가 이것을 제대로 하고 있나요?", "Am I doing this right?"),
+        ("내가 당신의 친구인가요?", "Am I your friend?"),
+        ("내가 너무 시끄러운가요?", "Am I too loud?"),
+        ("내가 맞는 길로 가고 있나요?", "Am I on the right way?"),
+        ("내가 일찍 왔나요?", "Am I early?"),
+        ("내가 너무 빨리 말하고 있나요?", "Am I speaking too fast?"),
     ]
 
     var body: some View {
@@ -66,26 +68,46 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     ForEach(sentences) { item in
-                        ZStack(alignment: .topTrailing) {
-                            Text(item.text)
+                        let isExpanded = expandedIDs.contains(item.id)
+
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(item.korean)
                                 .font(.body)
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
 
-                            Button {
-                                speechManager.speak(item.text)
-                            } label: {
-                                Image(systemName: "speaker.wave.2.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.blue)
-                                    .padding(8)
-                                    .background(Color(.systemBackground))
-                                    .clipShape(Circle())
-                                    .shadow(radius: 2)
+                            if isExpanded {
+                                Divider()
+                                    .padding(.horizontal)
+
+                                HStack {
+                                    Text(item.english)
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+
+                                    Spacer()
+
+                                    Button {
+                                        speechManager.speak(item.english)
+                                    } label: {
+                                        Image(systemName: "speaker.wave.2.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                                .padding()
                             }
-                            .padding(8)
+                        }
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .onTapGesture {
+                            withAnimation {
+                                if isExpanded {
+                                    expandedIDs.remove(item.id)
+                                } else {
+                                    expandedIDs.insert(item.id)
+                                }
+                            }
                         }
                     }
                 }
@@ -105,11 +127,11 @@ struct ContentView: View {
     }
 
     private func addSentence() {
-        let usedTexts = Set(sentences.map(\.text))
-        let available = sentencePool.filter { !usedTexts.contains($0) }
-        if let sentence = available.randomElement() {
+        let usedEnglish = Set(sentences.map(\.english))
+        let available = sentencePool.filter { !usedEnglish.contains($0.english) }
+        if let pair = available.randomElement() {
             withAnimation {
-                sentences.append(SentenceItem(text: sentence))
+                sentences.append(SentenceItem(korean: pair.korean, english: pair.english))
             }
         }
     }
