@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import NaturalLanguage
 
 // MARK: - Models
 
@@ -391,6 +392,146 @@ let grammarStages: [GrammarStage] = [
     ),
 ]
 
+// MARK: - POS-Tagged Text
+
+// Known predicate words (auxiliaries, modals, common verbs used as predicates)
+private let predicateWords: Set<String> = [
+    // be
+    "am", "is", "are", "was", "were", "'m", "'re", "'s",
+    // do
+    "do", "does", "did", "don't", "doesn't", "didn't",
+    // have
+    "have", "has", "had", "haven't", "hasn't", "hadn't",
+    // modals
+    "can", "can't", "cannot", "could", "couldn't",
+    "will", "won't", "would", "wouldn't",
+    "shall", "shan't", "should", "shouldn't",
+    "may", "might", "must", "mustn't",
+    // common contractions
+    "'ll", "'d", "'ve",
+]
+
+func taggedEnglish(_ text: String) -> AttributedString {
+    let tagger = NLTagger(tagSchemes: [.lexicalClass])
+    tagger.string = text
+    tagger.setLanguage(.english, range: text.startIndex..<text.endIndex)
+
+    // First pass: collect words with their tags to find the predicate
+    struct WordInfo {
+        let word: String
+        let tag: NLTag?
+        let tokenRange: Range<String.Index>
+    }
+
+    var words: [WordInfo] = []
+    tagger.enumerateTags(
+        in: text.startIndex..<text.endIndex,
+        unit: .word,
+        scheme: .lexicalClass,
+        options: [.omitWhitespace, .omitPunctuation]
+    ) { tag, tokenRange in
+        let word = String(text[tokenRange])
+        words.append(WordInfo(word: word, tag: tag, tokenRange: tokenRange))
+        return true
+    }
+
+    // Find predicate: first verb that is a known predicate word,
+    // or fall back to the first verb in the sentence
+    let predicateIndex: Int? = {
+        if let idx = words.firstIndex(where: { $0.tag == .verb && predicateWords.contains($0.word.lowercased()) }) {
+            return idx
+        }
+        return words.firstIndex(where: { $0.tag == .verb })
+    }()
+
+    // Check if consecutive verbs form a verb phrase (e.g. "am learning", "don't like")
+    var predicateIndices: Set<Int> = []
+    if let start = predicateIndex {
+        predicateIndices.insert(start)
+        // Include consecutive verbs right after the predicate
+        var next = start + 1
+        while next < words.count && words[next].tag == .verb {
+            predicateIndices.insert(next)
+            next += 1
+        }
+        // Also include "not" or adverbs between predicate verbs
+        if start + 1 < words.count {
+            let nextWord = words[start + 1].word.lowercased()
+            if nextWord == "not" || nextWord == "n't" {
+                predicateIndices.insert(start + 1)
+                if start + 2 < words.count && words[start + 2].tag == .verb {
+                    predicateIndices.insert(start + 2)
+                }
+            }
+        }
+    }
+
+    // Find subject: in statements it's before the predicate,
+    // in questions (predicate at index 0) it's right after the predicate
+    var subjectIndices: Set<Int> = []
+    if let predStart = predicateIndex {
+        let isQuestion = predStart == 0
+        if isQuestion {
+            // Question: subject comes after the predicate (e.g. "Am I late?", "Did you eat?")
+            let searchStart = (predicateIndices.max() ?? predStart) + 1
+            for i in searchStart..<words.count {
+                let tag = words[i].tag
+                if tag == .noun || tag == .pronoun || tag == .determiner || tag == .adjective {
+                    subjectIndices.insert(i)
+                } else {
+                    break
+                }
+            }
+        } else {
+            // Statement: subject comes before the predicate
+            for i in 0..<predStart {
+                let tag = words[i].tag
+                if tag == .noun || tag == .pronoun || tag == .determiner || tag == .adjective {
+                    subjectIndices.insert(i)
+                }
+            }
+        }
+    }
+
+    // Second pass: build attributed string
+    var result = AttributedString()
+    var lastEnd = text.startIndex
+
+    for (index, info) in words.enumerated() {
+        // Append gap (spaces, punctuation) before this word
+        if lastEnd < info.tokenRange.lowerBound {
+            var gap = AttributedString(text[lastEnd..<info.tokenRange.lowerBound])
+            gap.font = .body
+            gap.foregroundColor = .secondary
+            result.append(gap)
+        }
+
+        var token = AttributedString(text[info.tokenRange])
+
+        if predicateIndices.contains(index) || subjectIndices.contains(index) {
+            // Subject & Predicate: bold
+            token.font = .body.bold()
+            token.foregroundColor = .primary
+        } else {
+            token.font = .body
+            token.foregroundColor = .secondary
+        }
+
+        result.append(token)
+        lastEnd = info.tokenRange.upperBound
+    }
+
+    // Append trailing punctuation/whitespace
+    if lastEnd < text.endIndex {
+        var trailing = AttributedString(text[lastEnd..<text.endIndex])
+        trailing.font = .body
+        trailing.foregroundColor = .secondary
+        result.append(trailing)
+    }
+
+    return result
+}
+
 // MARK: - Tab View
 
 struct ContentView: View {
@@ -466,9 +607,7 @@ struct RandomPracticeView: View {
                                 .padding(.horizontal)
 
                             HStack {
-                                Text(sentence.english)
-                                    .font(.body)
-                                    .foregroundStyle(.secondary)
+                                Text(taggedEnglish(sentence.english))
 
                                 Spacer()
 
@@ -556,9 +695,7 @@ struct SentencePracticeView: View {
                                 .padding(.horizontal)
 
                             HStack {
-                                Text(item.english)
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
+                                Text(taggedEnglish(item.english))
 
                                 Spacer()
 
