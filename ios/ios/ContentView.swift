@@ -176,34 +176,34 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     ForEach(grammarStages) { stage in
                         NavigationLink(value: stage.id) {
-                            HStack(spacing: 16) {
-                                Image(systemName: stage.icon)
-                                    .font(.system(size: 28))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 56, height: 56)
-                                    .background(.blue.gradient)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                                VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
                                     Text(stage.title)
-                                        .font(.headline)
-                                    Text(stage.subtitle)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundStyle(.blue)
+                                    Spacer()
+                                    Text("\(stage.sentencePool.count) sentences")
+                                        .font(.caption)
+                                        .foregroundStyle(.tertiary)
                                 }
 
-                                Spacer()
+                                Text(stage.subtitle)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.primary)
 
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.tertiary)
+                                if let example = stage.sentencePool.first {
+                                    Text("e.g. \(example.english)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
-                            .padding()
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
                     }
