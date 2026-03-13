@@ -27,6 +27,14 @@ struct GrammarStage: Identifiable {
 class SpeechManager {
     private var synthesizer: AVSpeechSynthesizer?
     private let voiceIdentifierKey = "speechVoiceIdentifier"
+    private let preferredVoiceIdentifiers = [
+        "com.apple.ttsbundle.Alex-compact",
+        "com.apple.ttsbundle.Samantha-compact",
+    ]
+    private let maleNameHints = [
+        "Alex", "Daniel", "Tom", "Fred", "Aaron", "Arthur", "Bruce", "Eddy",
+        "Evan", "Lee", "Mark", "Oliver", "Rishi", "Reed", "Ralph", "Yannick"
+    ]
 
     func speak(_ text: String) {
         if synthesizer == nil {
@@ -51,9 +59,24 @@ class SpeechManager {
     private func bestEnglishVoice() -> AVSpeechSynthesisVoice? {
         let voices = AVSpeechSynthesisVoice.speechVoices()
         if let storedIdentifier = UserDefaults.standard.string(forKey: voiceIdentifierKey),
-           !storedIdentifier.isEmpty,
+           preferredVoiceIdentifiers.contains(storedIdentifier),
            let storedVoice = voices.first(where: { $0.identifier == storedIdentifier }) {
             return storedVoice
+        }
+
+        if let storedIdentifier = UserDefaults.standard.string(forKey: voiceIdentifierKey),
+           storedIdentifier == "com.apple.ttsbundle.Alex-compact" {
+            if let maleVoice = voices.first(where: { voice in
+                voice.language.hasPrefix("en") && maleNameHints.contains(voice.name)
+            }) {
+                return maleVoice
+            }
+        }
+
+        for identifier in preferredVoiceIdentifiers {
+            if let voice = voices.first(where: { $0.identifier == identifier }) {
+                return voice
+            }
         }
 
         let enUSVoices = voices.filter { $0.language == "en-US" }
