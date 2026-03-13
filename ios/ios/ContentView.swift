@@ -215,6 +215,18 @@ final class StudyReminderScheduler {
             await scheduleOneOffsForTestWindow()
         }
     }
+
+    func disableTestReminder() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let prefix = reminderIdentifierPrefix + "."
+        let identifiers = pending
+            .filter { $0.identifier.hasPrefix(prefix) }
+            .map(\.identifier)
+        if !identifiers.isEmpty {
+            center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        }
+    }
 }
 
 // MARK: - View Models
@@ -292,6 +304,7 @@ struct ContentView: View {
     private let speechManager: SpeechSynthesizing
     private let tagger: EnglishTagging
     private let reminderScheduler = StudyReminderScheduler()
+    @AppStorage("studyReminderEnabled") private var studyReminderEnabled = false
 
     init(
         stageProvider: GrammarStageProviding = DefaultGrammarStageStore(),
@@ -321,9 +334,37 @@ struct ContentView: View {
                 .tabItem {
                     Label("Random", systemImage: "shuffle")
                 }
+            SettingsView(isReminderEnabled: $studyReminderEnabled)
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
         }
         .task {
-            await reminderScheduler.enableTestReminder()
+            if studyReminderEnabled {
+                await reminderScheduler.enableTestReminder()
+            }
+        }
+        .onChange(of: studyReminderEnabled) { _, newValue in
+            Task {
+                if newValue {
+                    await reminderScheduler.enableTestReminder()
+                } else {
+                    await reminderScheduler.disableTestReminder()
+                }
+            }
+        }
+    }
+}
+
+struct SettingsView: View {
+    @Binding var isReminderEnabled: Bool
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Toggle("Study reminders", isOn: $isReminderEnabled)
+            }
+            .navigationTitle("Settings")
         }
     }
 }
