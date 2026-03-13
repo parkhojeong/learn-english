@@ -8,6 +8,7 @@
 import SwiftUI
 import NaturalLanguage
 import SwiftData
+import UserNotifications
 
 // MARK: - Models
 
@@ -159,6 +160,55 @@ struct DefaultGrammarStageStore: GrammarStageProviding {
     let stages: [GrammarStage] = grammarStages
 }
 
+final class StudyReminderScheduler {
+    private let reminderIdentifier = "study.reminder.every.minute"
+    private let title = "Study Reminder"
+    private let body = "Time to start studying."
+
+    func requestAuthorizationIfNeeded() async -> Bool {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .denied:
+            return false
+        case .notDetermined:
+            return await withCheckedContinuation { continuation in
+                center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                    continuation.resume(returning: granted)
+                }
+            }
+        @unknown default:
+            return false
+        }
+    }
+
+    func scheduleEveryMinute() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        if pending.contains(where: { $0.identifier == reminderIdentifier }) {
+            return
+        }
+
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: true)
+        let request = UNNotificationRequest(identifier: reminderIdentifier, content: content, trigger: trigger)
+        _ = try? await center.add(request)
+    }
+
+    func enableTestReminder() async {
+        let granted = await requestAuthorizationIfNeeded()
+        if granted {
+            await scheduleEveryMinute()
+        }
+    }
+}
+
 // MARK: - View Models
 
 @Observable
@@ -233,6 +283,7 @@ struct ContentView: View {
     private let stageProvider: GrammarStageProviding
     private let speechManager: SpeechSynthesizing
     private let tagger: EnglishTagging
+    private let reminderScheduler = StudyReminderScheduler()
 
     init(
         stageProvider: GrammarStageProviding = DefaultGrammarStageStore(),
@@ -262,6 +313,9 @@ struct ContentView: View {
                 .tabItem {
                     Label("Random", systemImage: "shuffle")
                 }
+        }
+        .task {
+            await reminderScheduler.enableTestReminder()
         }
     }
 }
