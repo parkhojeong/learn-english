@@ -26,6 +26,7 @@ struct GrammarStage: Identifiable {
 @Observable
 class SpeechManager {
     private var synthesizer: AVSpeechSynthesizer?
+    private let voiceIdentifierKey = "speechVoiceIdentifier"
 
     func speak(_ text: String) {
         if synthesizer == nil {
@@ -49,6 +50,12 @@ class SpeechManager {
 
     private func bestEnglishVoice() -> AVSpeechSynthesisVoice? {
         let voices = AVSpeechSynthesisVoice.speechVoices()
+        if let storedIdentifier = UserDefaults.standard.string(forKey: voiceIdentifierKey),
+           !storedIdentifier.isEmpty,
+           let storedVoice = voices.first(where: { $0.identifier == storedIdentifier }) {
+            return storedVoice
+        }
+
         let enUSVoices = voices.filter { $0.language == "en-US" }
         if let best = enUSVoices.sorted(by: { $0.quality.rawValue > $1.quality.rawValue }).first {
             return best

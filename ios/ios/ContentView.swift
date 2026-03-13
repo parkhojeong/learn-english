@@ -9,6 +9,7 @@ import SwiftUI
 import NaturalLanguage
 import SwiftData
 import UserNotifications
+import AVFoundation
 
 // MARK: - Models
 
@@ -216,6 +217,7 @@ final class StudyReminderScheduler {
     func enableTestReminder(intervalSeconds: TimeInterval) async {
         let granted = await requestAuthorizationIfNeeded()
         if granted {
+            await disableTestReminder()
             await scheduleOneOffsForTestWindow(intervalSeconds: intervalSeconds)
         }
     }
@@ -223,7 +225,7 @@ final class StudyReminderScheduler {
     func disableTestReminder() async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
-        let prefix = reminderIdentifierPrefix + "."
+        let prefix = "study.reminder"
         let identifiers = pending
             .filter { $0.identifier.hasPrefix(prefix) }
             .map(\.identifier)
@@ -324,6 +326,7 @@ struct ContentView: View {
     @AppStorage("studyReminderEnabled") private var studyReminderEnabled = false
     @AppStorage("studyReminderIntervalHours") private var studyReminderIntervalHours = 0
     @AppStorage("studyReminderIntervalMinutes") private var studyReminderIntervalMinutes = 10
+    @AppStorage("speechVoiceIdentifier") private var speechVoiceIdentifier = ""
 
     init(
         stageProvider: GrammarStageProviding = DefaultGrammarStageStore(),
@@ -356,7 +359,8 @@ struct ContentView: View {
             SettingsView(
                 isReminderEnabled: $studyReminderEnabled,
                 intervalHours: $studyReminderIntervalHours,
-                intervalMinutes: $studyReminderIntervalMinutes
+                intervalMinutes: $studyReminderIntervalMinutes,
+                selectedVoiceIdentifier: $speechVoiceIdentifier
             )
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
@@ -408,7 +412,11 @@ struct SettingsView: View {
     @Binding var isReminderEnabled: Bool
     @Binding var intervalHours: Int
     @Binding var intervalMinutes: Int
+    @Binding var selectedVoiceIdentifier: String
     @State private var isEditingInterval = false
+    private let availableVoices = AVSpeechSynthesisVoice.speechVoices()
+        .filter { $0.language.hasPrefix("en") }
+        .sorted { $0.name < $1.name }
 
     var body: some View {
         NavigationStack {
@@ -443,6 +451,15 @@ struct SettingsView: View {
                             .pickerStyle(.wheel)
                         }
                         .frame(height: 140)
+                    }
+                }
+
+                Section("Voice") {
+                    Picker("Voice", selection: $selectedVoiceIdentifier) {
+                        Text("Automatic").tag("")
+                        ForEach(availableVoices, id: \.identifier) { voice in
+                            Text("\(voice.name) (\(voice.language))").tag(voice.identifier)
+                        }
                     }
                 }
             }
