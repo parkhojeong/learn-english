@@ -161,9 +161,11 @@ struct DefaultGrammarStageStore: GrammarStageProviding {
 }
 
 final class StudyReminderScheduler {
-    private let reminderIdentifier = "study.reminder.every.minute"
+    private let reminderIdentifierPrefix = "study.reminder.oneoff"
     private let title = "Study Reminder"
     private let body = "Time to start studying."
+    private let intervalSeconds: TimeInterval = 10
+    private let windowMinutes: Int = 10
 
     func requestAuthorizationIfNeeded() async -> Bool {
         let center = UNUserNotificationCenter.current()
@@ -184,10 +186,11 @@ final class StudyReminderScheduler {
         }
     }
 
-    func scheduleEveryMinute() async {
+    func scheduleOneOffsForTestWindow() async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
-        if pending.contains(where: { $0.identifier == reminderIdentifier }) {
+        let prefix = reminderIdentifierPrefix + "."
+        if pending.contains(where: { $0.identifier.hasPrefix(prefix) }) {
             return
         }
 
@@ -196,15 +199,20 @@ final class StudyReminderScheduler {
         content.body = body
         content.sound = .default
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: true)
-        let request = UNNotificationRequest(identifier: reminderIdentifier, content: content, trigger: trigger)
-        _ = try? await center.add(request)
+        let totalCount = max(1, Int((Double(windowMinutes) * 60.0) / intervalSeconds))
+        for index in 0..<totalCount {
+            let fireIn = intervalSeconds * Double(index + 1)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: fireIn, repeats: false)
+            let identifier = "\(reminderIdentifierPrefix).\(index)"
+            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+            _ = try? await center.add(request)
+        }
     }
 
     func enableTestReminder() async {
         let granted = await requestAuthorizationIfNeeded()
         if granted {
-            await scheduleEveryMinute()
+            await scheduleOneOffsForTestWindow()
         }
     }
 }
