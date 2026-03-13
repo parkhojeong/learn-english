@@ -406,34 +406,36 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Toggle("Study reminders", isOn: $isReminderEnabled)
-                HStack {
-                    Text("Interval")
-                    Spacer()
-                    Text("\(intervalHours) hr \(intervalMinutes) min")
-                        .foregroundStyle(.secondary)
-                    Button(isEditingInterval ? "Done" : "Edit") {
-                        withAnimation {
-                            isEditingInterval.toggle()
-                        }
-                    }
-                }
-                if isEditingInterval {
+                if isReminderEnabled {
                     HStack {
-                        Picker("Hours", selection: $intervalHours) {
-                            ForEach(0..<24, id: \.self) { hour in
-                                Text("\(hour) hr").tag(hour)
+                        Text("Interval")
+                        Spacer()
+                        Text("\(intervalHours) hr \(intervalMinutes) min")
+                            .foregroundStyle(.secondary)
+                        Button(isEditingInterval ? "Done" : "Edit") {
+                            withAnimation {
+                                isEditingInterval.toggle()
                             }
                         }
-                        .pickerStyle(.wheel)
-
-                        Picker("Minutes", selection: $intervalMinutes) {
-                            ForEach(0..<60, id: \.self) { minute in
-                                Text("\(minute) min").tag(minute)
-                            }
-                        }
-                        .pickerStyle(.wheel)
                     }
-                    .frame(height: 140)
+                    if isEditingInterval {
+                        HStack {
+                            Picker("Hours", selection: $intervalHours) {
+                                ForEach(0..<24, id: \.self) { hour in
+                                    Text("\(hour) hr").tag(hour)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+
+                            Picker("Minutes", selection: $intervalMinutes) {
+                                ForEach(0..<60, id: \.self) { minute in
+                                    Text("\(minute) min").tag(minute)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                        }
+                        .frame(height: 140)
+                    }
                 }
             }
             .navigationTitle("Settings")
