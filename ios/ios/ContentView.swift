@@ -7,6 +7,7 @@
 
 import SwiftUI
 import NaturalLanguage
+import SwiftData
 
 // MARK: - Models
 
@@ -166,6 +167,7 @@ final class RandomPracticeViewModel {
 
     var currentSentence: SentencePair?
     var showEnglish = false
+    private var history: [SentencePair] = []
 
     init(stageProvider: GrammarStageProviding) {
         self.allSentences = stageProvider.stages.flatMap { stage in
@@ -174,12 +176,25 @@ final class RandomPracticeViewModel {
     }
 
     func nextSentence() {
+        if let currentSentence {
+            history.append(currentSentence)
+        }
         showEnglish = false
         currentSentence = allSentences.randomElement()
     }
 
     func revealEnglish() {
         showEnglish = true
+    }
+
+    func previousSentence() {
+        guard let previous = history.popLast() else { return }
+        showEnglish = false
+        currentSentence = previous
+    }
+
+    var canGoBack: Bool {
+        !history.isEmpty
     }
 }
 
@@ -257,6 +272,8 @@ struct StageListView: View {
     private let stageProvider: GrammarStageProviding
     private let speechManager: SpeechSynthesizing
     private let tagger: EnglishTagging
+    @Environment(\.modelContext) private var modelContext
+    @Query private var completions: [StageCompletion]
 
     init(
         stageProvider: GrammarStageProviding,
@@ -272,26 +289,65 @@ struct StageListView: View {
         NavigationStack {
             List {
                 ForEach(Array(stageProvider.stages.enumerated()), id: \.element.id) { index, stage in
-                    NavigationLink {
-                        SentencePracticeView(
-                            viewModel: SentencePracticeViewModel(stage: stage),
-                            speechManager: speechManager,
-                            tagger: tagger
-                        )
-                    } label: {
-                        HStack(spacing: 8) {
-                            Text("\(index + 1).")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 28, alignment: .trailing)
-                            Text(stage.subtitle)
-                                .font(.subheadline.weight(.medium))
+                    HStack(spacing: 8) {
+                        NavigationLink {
+                            SentencePracticeView(
+                                viewModel: SentencePracticeViewModel(stage: stage),
+                                speechManager: speechManager,
+                                tagger: tagger
+                            )
+                        } label: {
+                            HStack(spacing: 8) {
+                                Text("\(index + 1).")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 28, alignment: .trailing)
+                                Text(stage.subtitle)
+                                    .font(.subheadline.weight(.medium))
+                            }
                         }
+                        .buttonStyle(.plain)
+
+                        Spacer()
+
+                        Toggle(isOn: completionBinding(for: stage)) {
+                            Image(systemName: isComplete(stage: stage) ? "checkmark.circle.fill" : "checkmark.circle")
+                        }
+                        .labelsHidden()
+                        .toggleStyle(.button)
+                        .tint(.green)
+                        .accessibilityLabel(isComplete(stage: stage) ? "Stage complete" : "Mark stage complete")
                     }
                 }
             }
             .listStyle(.plain)
             .navigationTitle("Stages")
+        }
+    }
+
+    private func isComplete(stage: GrammarStage) -> Bool {
+        completion(for: stage)?.isComplete == true
+    }
+
+    private func completion(for stage: GrammarStage) -> StageCompletion? {
+        completions.first { $0.stageKey == stage.title }
+    }
+
+    private func completionBinding(for stage: GrammarStage) -> Binding<Bool> {
+        Binding(
+            get: { isComplete(stage: stage) },
+            set: { isComplete in
+                setCompletion(for: stage, isComplete: isComplete)
+            }
+        )
+    }
+
+    private func setCompletion(for stage: GrammarStage, isComplete: Bool) {
+        if let completion = completion(for: stage) {
+            completion.isComplete = isComplete
+        } else if isComplete {
+            let completion = StageCompletion(stageKey: stage.title, isComplete: true)
+            modelContext.insert(completion)
         }
     }
 }
@@ -366,17 +422,32 @@ struct RandomPracticeView: View {
 
                 Spacer()
 
-                Button {
-                    withAnimation {
-                        viewModel.nextSentence()
+                HStack(spacing: 12) {
+                    Button {
+                        withAnimation {
+                            viewModel.previousSentence()
+                        }
+                    } label: {
+                        Label("Previous", systemImage: "arrow.uturn.left")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
                     }
-                } label: {
-                    Label("Next", systemImage: "shuffle")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                    .buttonStyle(.bordered)
+                    .disabled(!viewModel.canGoBack)
+
+                    Button {
+                        withAnimation {
+                            viewModel.nextSentence()
+                        }
+                    } label: {
+                        Label("Next", systemImage: "shuffle")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.borderedProminent)
                 .padding(.horizontal)
                 .padding(.bottom, 16)
             }
@@ -470,4 +541,5 @@ struct SentencePracticeView: View {
 
 #Preview {
     ContentView()
+        .modelContainer(for: StageCompletion.self, inMemory: true)
 }

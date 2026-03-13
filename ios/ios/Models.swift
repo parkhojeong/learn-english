@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
 
 struct SentenceItem: Identifiable {
     let id = UUID()
@@ -43,5 +44,16 @@ class SpeechManager {
         utterance.preUtteranceDelay = 0.1
         utterance.postUtteranceDelay = 0.1
         synthesizer.speak(utterance)
+    }
+}
+
+@Model
+final class StageCompletion {
+    var stageKey: String
+    var isComplete: Bool
+
+    init(stageKey: String, isComplete: Bool = false) {
+        self.stageKey = stageKey
+        self.isComplete = isComplete
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct iosApp: App {
@@ -13,5 +14,6 @@ struct iosApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: StageCompletion.self)
     }
 }
