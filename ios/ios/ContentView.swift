@@ -164,7 +164,7 @@ final class StudyReminderScheduler {
     private let reminderIdentifierPrefix = "study.reminder.oneoff"
     private let title = "Study Reminder"
     private let body = "Time to start studying."
-    private let intervalSeconds: TimeInterval = 10
+    private let maxPendingNotifications = 64
     private let windowMinutes: Int = 10
 
     func requestAuthorizationIfNeeded() async -> Bool {
@@ -186,7 +186,7 @@ final class StudyReminderScheduler {
         }
     }
 
-    func scheduleOneOffsForTestWindow() async {
+    func scheduleOneOffsForTestWindow(intervalSeconds: TimeInterval) async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
         let prefix = reminderIdentifierPrefix + "."
@@ -199,7 +199,7 @@ final class StudyReminderScheduler {
         content.body = body
         content.sound = .default
 
-        let totalCount = max(1, Int((Double(windowMinutes) * 60.0) / intervalSeconds))
+        let totalCount = max(1, min(maxPendingNotifications, Int((Double(windowMinutes) * 60.0) / intervalSeconds)))
         for index in 0..<totalCount {
             let fireIn = intervalSeconds * Double(index + 1)
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: fireIn, repeats: false)
@@ -210,9 +210,13 @@ final class StudyReminderScheduler {
     }
 
     func enableTestReminder() async {
+        await enableTestReminder(intervalSeconds: 10)
+    }
+
+    func enableTestReminder(intervalSeconds: TimeInterval) async {
         let granted = await requestAuthorizationIfNeeded()
         if granted {
-            await scheduleOneOffsForTestWindow()
+            await scheduleOneOffsForTestWindow(intervalSeconds: intervalSeconds)
         }
     }
 
@@ -226,6 +230,11 @@ final class StudyReminderScheduler {
         if !identifiers.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: identifiers)
         }
+    }
+
+    func resetTestReminder(intervalSeconds: TimeInterval) async {
+        await disableTestReminder()
+        await enableTestReminder(intervalSeconds: intervalSeconds)
     }
 }
 
@@ -305,6 +314,8 @@ struct ContentView: View {
     private let tagger: EnglishTagging
     private let reminderScheduler = StudyReminderScheduler()
     @AppStorage("studyReminderEnabled") private var studyReminderEnabled = false
+    @AppStorage("studyReminderIntervalHours") private var studyReminderIntervalHours = 0
+    @AppStorage("studyReminderIntervalMinutes") private var studyReminderIntervalMinutes = 10
 
     init(
         stageProvider: GrammarStageProviding = DefaultGrammarStageStore(),
@@ -334,35 +345,96 @@ struct ContentView: View {
                 .tabItem {
                     Label("Random", systemImage: "shuffle")
                 }
-            SettingsView(isReminderEnabled: $studyReminderEnabled)
+            SettingsView(
+                isReminderEnabled: $studyReminderEnabled,
+                intervalHours: $studyReminderIntervalHours,
+                intervalMinutes: $studyReminderIntervalMinutes
+            )
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
         .task {
             if studyReminderEnabled {
-                await reminderScheduler.enableTestReminder()
+                let seconds = reminderIntervalSeconds()
+                await reminderScheduler.enableTestReminder(intervalSeconds: seconds)
             }
         }
         .onChange(of: studyReminderEnabled) { _, newValue in
             Task {
                 if newValue {
-                    await reminderScheduler.enableTestReminder()
+                    let seconds = reminderIntervalSeconds()
+                    await reminderScheduler.enableTestReminder(intervalSeconds: seconds)
                 } else {
                     await reminderScheduler.disableTestReminder()
                 }
             }
         }
+        .onChange(of: studyReminderIntervalHours) { _, _ in
+            Task {
+                if studyReminderEnabled {
+                    let seconds = reminderIntervalSeconds()
+                    await reminderScheduler.resetTestReminder(intervalSeconds: seconds)
+                }
+            }
+        }
+        .onChange(of: studyReminderIntervalMinutes) { _, _ in
+            Task {
+                if studyReminderEnabled {
+                    let seconds = reminderIntervalSeconds()
+                    await reminderScheduler.resetTestReminder(intervalSeconds: seconds)
+                }
+            }
+        }
+    }
+
+    private func reminderIntervalSeconds() -> TimeInterval {
+        let hours = max(0, studyReminderIntervalHours)
+        let minutes = max(0, studyReminderIntervalMinutes)
+        let totalMinutes = max(1, hours * 60 + minutes)
+        return TimeInterval(totalMinutes * 60)
     }
 }
 
 struct SettingsView: View {
     @Binding var isReminderEnabled: Bool
+    @Binding var intervalHours: Int
+    @Binding var intervalMinutes: Int
+    @State private var isEditingInterval = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Toggle("Study reminders", isOn: $isReminderEnabled)
+                HStack {
+                    Text("Interval")
+                    Spacer()
+                    Text("\(intervalHours) hr \(intervalMinutes) min")
+                        .foregroundStyle(.secondary)
+                    Button(isEditingInterval ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditingInterval.toggle()
+                        }
+                    }
+                }
+                if isEditingInterval {
+                    HStack {
+                        Picker("Hours", selection: $intervalHours) {
+                            ForEach(0..<24, id: \.self) { hour in
+                                Text("\(hour) hr").tag(hour)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+
+                        Picker("Minutes", selection: $intervalMinutes) {
+                            ForEach(0..<60, id: \.self) { minute in
+                                Text("\(minute) min").tag(minute)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                    }
+                    .frame(height: 140)
+                }
             }
             .navigationTitle("Settings")
         }
