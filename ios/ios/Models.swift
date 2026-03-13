@@ -38,12 +38,27 @@ class SpeechManager {
         }
 
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = 0.45
-        utterance.pitchMultiplier = 1.05
-        utterance.preUtteranceDelay = 0.1
-        utterance.postUtteranceDelay = 0.1
+        utterance.voice = bestEnglishVoice()
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        utterance.pitchMultiplier = 1.0
+        utterance.volume = 1.0
+        utterance.preUtteranceDelay = 0.0
+        utterance.postUtteranceDelay = 0.0
         synthesizer.speak(utterance)
+    }
+
+    private func bestEnglishVoice() -> AVSpeechSynthesisVoice? {
+        let voices = AVSpeechSynthesisVoice.speechVoices()
+        let enUSVoices = voices.filter { $0.language == "en-US" }
+        if let best = enUSVoices.sorted(by: { $0.quality.rawValue > $1.quality.rawValue }).first {
+            return best
+        }
+
+        if let anyEnglish = voices.first(where: { $0.language.hasPrefix("en") }) {
+            return anyEnglish
+        }
+
+        return AVSpeechSynthesisVoice(language: "en-US")
     }
 }
 
