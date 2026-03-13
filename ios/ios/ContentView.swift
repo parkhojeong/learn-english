@@ -292,6 +292,7 @@ struct StageListView: View {
                     HStack(spacing: 8) {
                         Toggle(isOn: completionBinding(for: stage)) {
                             Image(systemName: isComplete(stage: stage) ? "checkmark.circle.fill" : "checkmark.circle")
+                                .foregroundStyle(isComplete(stage: stage) ? .green : .secondary)
                         }
                         .labelsHidden()
                         .toggleStyle(.button)
