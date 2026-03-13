@@ -290,6 +290,14 @@ struct StageListView: View {
             List {
                 ForEach(Array(stageProvider.stages.enumerated()), id: \.element.id) { index, stage in
                     HStack(spacing: 8) {
+                        Toggle(isOn: completionBinding(for: stage)) {
+                            Image(systemName: isComplete(stage: stage) ? "checkmark.circle.fill" : "checkmark.circle")
+                        }
+                        .labelsHidden()
+                        .toggleStyle(.button)
+                        .tint(.green)
+                        .accessibilityLabel(isComplete(stage: stage) ? "Stage complete" : "Mark stage complete")
+
                         NavigationLink {
                             SentencePracticeView(
                                 viewModel: SentencePracticeViewModel(stage: stage),
@@ -309,14 +317,6 @@ struct StageListView: View {
                         .buttonStyle(.plain)
 
                         Spacer()
-
-                        Toggle(isOn: completionBinding(for: stage)) {
-                            Image(systemName: isComplete(stage: stage) ? "checkmark.circle.fill" : "checkmark.circle")
-                        }
-                        .labelsHidden()
-                        .toggleStyle(.button)
-                        .tint(.green)
-                        .accessibilityLabel(isComplete(stage: stage) ? "Stage complete" : "Mark stage complete")
                     }
                 }
             }
