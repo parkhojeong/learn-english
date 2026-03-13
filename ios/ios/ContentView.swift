@@ -230,6 +230,14 @@ final class StudyReminderScheduler {
         if !identifiers.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: identifiers)
         }
+
+        let delivered = await center.deliveredNotifications()
+        let deliveredIdentifiers = delivered
+            .map(\.request.identifier)
+            .filter { $0.hasPrefix(prefix) }
+        if !deliveredIdentifiers.isEmpty {
+            center.removeDeliveredNotifications(withIdentifiers: deliveredIdentifiers)
+        }
     }
 
     func resetTestReminder(intervalSeconds: TimeInterval) async {
